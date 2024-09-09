@@ -1,37 +1,79 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import { ElprisProvider } from "@/context/elpris.context";
+import { Stack, Tabs } from "expo-router";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { Animated } from "react-native";
+import { useRef, useEffect, useState } from "react";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
+    Animated.timing(opacity, {
+      toValue: 1, // Animate to full opacity
+      duration: 1000, // Duration of the animation (0.5 seconds)
+      useNativeDriver: true, // Enable native driver for better performance
+    }).start();
+  }, [opacity]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <ElprisProvider>
+      {/* <Animated.View style={{ flex: 1, opacity }}> */}
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: "#d1603d",
+          tabBarInactiveTintColor: "#CDCDE0",
+          tabBarShowLabel: false,
+          tabBarStyle: {
+            backgroundColor: "#161622",
+            borderTopWidth: 1,
+            borderTopColor: "#232533",
+            height: 84,
+            opacity: opacity,
+          },
+        }}
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Hem",
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="home" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="elbovslistan/elbovslistan"
+          options={{
+            title: "Elbovslistan",
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="bar-chart" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="kalkylator/kalkylator"
+          options={{
+            title: "Kalkylator",
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="calculator" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="elspartips/elspartips"
+          options={{
+            title: "Tips",
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="lightbulb-o" color={color} size={size} />
+            ),
+          }}
+        />
+      </Tabs>
+      {/* </Animated.View> */}
+    </ElprisProvider>
   );
 }
