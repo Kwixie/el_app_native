@@ -1,6 +1,6 @@
 import { SafeAreaView, StyleSheet, Text, View, FlatList } from "react-native";
 import { useContext } from "react";
-import { ElprisContext } from "../../context/elpris.context";
+import { ElprisContext } from "../../context/elpris.provider";
 import { CardSpartips, CardSpartipsTs } from "@/components/CardSpartips";
 import SPARTIPS_DATA from "@/assets/spartips-data";
 

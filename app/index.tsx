@@ -1,42 +1,211 @@
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ElprisContext } from "../context/elpris.context";
-import React, { useContext, useEffect, useState } from "react";
+import { ElprisContext } from "../context/elpris.provider";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import POWER_DATA from "../assets/power-data";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import axios from "axios";
+import {
+  Button,
+  TextInput,
+  Portal,
+  Modal,
+  IconButton,
+} from "react-native-paper";
+
+function HomeInfoModal() {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <>
+      <Portal>
+        <Modal
+          visible={visible}
+          onDismiss={() => setVisible(false)}
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "column",
+              margin: 20,
+              minWidth: "90%",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "black",
+              borderRadius: 10,
+              padding: 20,
+            }}
+          >
+            <ScrollView>
+              <Text style={[styles.bigText, styles.whiteText]}>Om Sidan</Text>
+              <Text style={styles.netOwnerText}>
+                Ofta när vi pratar om el pratar vi om elspotpriset, vad en
+                kilowattimme kostar på elprismarknaden. Men för att ta reda på
+                vad den totala konstnaden blir för slutkonsumenten behöver man
+                räkna på både energiskatt, moms och elöverföringsavgift. Den här
+                sidan är tänkt som en hjälp att snabbt se vad den totala
+                kostnaden blir efter alla skatter och extra avgifter är
+                inräknade. Ofta ligger det någonstans 3-4 gånger högre än själva
+                elspotpriset.
+              </Text>
+              <Text style={styles.subHeading}>
+                Hur räknas totalkostnaden ut?
+              </Text>
+              <Text style={styles.netOwnerText}>
+                Totalkostnaden räknas ut genom att använda det aktuella
+                elspotpriset + energiskatten på 0.392 kr/kWh + en
+                elöverföringsavgift på 0.25 kr/kWh {"("}eller anpassat värde
+                {")"}. Summan multipliceras sedan med momssatsen som ligger på
+                25%.
+              </Text>
+
+              <Text style={styles.subHeading}>Blir kostnaden exakt?</Text>
+              <Text style={styles.netOwnerText}>
+                Nej. Uträkningarna bygger på genomsnittliga förbrukningsvärden
+                av olika apparater. Förbrukningen för just din diskmaskin eller
+                kaffekokare kan mycket väl vara lägre eller högre, beroende på
+                hur gammal den är och energiklass. Det är också olika om man
+                betala för varmvatten och uppvärmning. Bor man i hus eller villa
+                är det vanligt att man gör det, men bor man i lägenhet är det
+                inte lika vanligt. Dessutom har kostnad för elcertifikat
+                exkluderats för att förenkla beräkningar. Vad man betalar för
+                det kan variera ganska mycket, men vanligt är att det bara utgör
+                någon till några procent av vad man totalt sett betalar för sin
+                el. Och så får man inte glömma att man ofta har fasta
+                abonnemangsavgifter både hos sitt elbolag och sin
+                elnätsleverantör. Skulle man räkna ut en snittkostnad för sina
+                kilowattimmar inkluderat dessa så kommer kostnaden att se högre
+                ut.
+              </Text>
+            </ScrollView>
+            <IconButton
+              icon="close-circle"
+              size={50}
+              iconColor="#d1603d"
+              style={{ position: "absolute", bottom: 5, right: 0 }}
+              onPress={() => setVisible(false)}
+            />
+          </View>
+        </Modal>
+      </Portal>
+      <IconButton
+        icon="information"
+        size={50}
+        iconColor="black"
+        style={{ position: "absolute", top: 10, right: 10 }}
+        onPress={() => setVisible(true)}
+      />
+    </>
+  );
+}
+
+function NetOwnerModal() {
+  const [visible, setVisible] = useState(false);
+  const { setNetOwnerPrice } = useContext(ElprisContext);
+
+  return (
+    <>
+      <Portal>
+        <Modal
+          visible={visible}
+          onDismiss={() => setVisible(false)}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "column",
+              height: 300,
+              width: 260,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f1f1f1",
+              borderRadius: 10,
+              padding: 14,
+            }}
+          >
+            <Text style={{ fontSize: 20, color: "black", marginBottom: 12 }}>
+              Nätägarpris i kr/kWh
+            </Text>
+            <Text style={{ fontSize: 16, color: "gray", marginBottom: 12 }}>
+              De beräknade värdena på denna sidan inkluderar energiskatt, moms
+              och en genomsnittlig nätöverföringsavgift på 25 öre/kWh.
+              Nätöverföringsavgiften kan dock variera mycket, kolla på din
+              senaste elfaktura och anpassa nedan.
+            </Text>
+            <TextInput
+              keyboardType="numeric"
+              style={{
+                maxHeight: 50,
+                fontSize: 20,
+                backgroundColor: "hsl(14, 62%, 90%)",
+              }}
+              onSubmitEditing={({ nativeEvent: { text } }) => {
+                console.log(text);
+                setNetOwnerPrice(Number(text));
+                setVisible(false);
+              }}
+            />
+          </View>
+        </Modal>
+      </Portal>
+      <Button
+        style={{ backgroundColor: "black", marginTop: 20, padding: 2 }}
+        textColor="white"
+        onPress={() => setVisible(true)}
+      >
+        Anpassa nätägaravgift
+      </Button>
+    </>
+  );
+}
 
 export default function Index() {
-  const { currentElpris, setCurrentElpris, pricePerKwh } =
+  const { currentElpris, pricePerKwh, setElprisArea, elprisArea } =
     useContext(ElprisContext);
-  const [elprisArea, setElprisArea] = useState("SE4");
+  const [animationShowerCost, setAnimationShowerCost] = useState("0.00");
+
+  const hotShower = useMemo(() => {
+    return (
+      (POWER_DATA.find((x) => x.id === 1)!.power * 0.2 * pricePerKwh) /
+      1000
+    ).toFixed(2);
+  }, [pricePerKwh]);
 
   useEffect(() => {
-    const date = new Date();
-    let hour = date.getHours();
-    let day = date.getDate().toString();
-    if (day.length < 2) {
-      day = "0" + day;
-    }
-    let monthNum = date.getMonth() + 1;
-    let month = monthNum.toString();
-    if (month.length < 2) {
-      month = "0" + month;
-    }
-    let year = date.getFullYear();
-    let currentDate = `${year}/${month}-${day}`;
-
-    fetch(
-      `https://www.elprisetjustnu.se/api/v1/prices/${currentDate}_${elprisArea}.json`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        setCurrentElpris(Math.round(data[hour].SEK_per_kWh * 100) / 100);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [elprisArea, setCurrentElpris]);
+    const countUpShowerCost = (currentShowerPrice: number) => {
+      console.log(currentShowerPrice);
+      let i = 0;
+      let countInterval = 1;
+      const interval = setInterval(() => {
+        i += countInterval;
+        console.log(countInterval);
+        if (countInterval > 0.05) {
+          countInterval -= 0.1;
+        }
+        setAnimationShowerCost(i.toFixed(2));
+        if (i >= currentShowerPrice) {
+          i = currentShowerPrice;
+          setAnimationShowerCost(i.toFixed(2));
+          clearInterval(interval);
+        }
+      }, 50);
+    };
+    countUpShowerCost(Number(hotShower));
+  }, [hotShower]);
 
   const handleNewElprisArea = (area: string) => {
     setElprisArea(area);
@@ -52,6 +221,7 @@ export default function Index() {
           backgroundColor: "#d1603d",
         }}
       >
+        <HomeInfoModal />
         <View
           style={{
             height: 300,
@@ -66,11 +236,8 @@ export default function Index() {
         >
           <Icon name="shower" size={80} color="#d1603d" />
           <Text style={styles.bigText}>En varm dusch kostar just nu</Text>
-          <Text style={styles.bigText}>
-            {Math.round(
-              ((POWER_DATA[1].power * 0.2 * pricePerKwh) / 1000) * 10
-            ) / 10}{" "}
-            kr
+          <Text style={{ fontWeight: 600, fontSize: 30 }}>
+            {animationShowerCost} kr
           </Text>
         </View>
         <Text style={[styles.bigText, styles.whiteText, { marginBottom: 20 }]}>
@@ -105,6 +272,7 @@ export default function Index() {
         <Text style={[styles.smallText]}>
           Aktuellt elspotpris: {currentElpris}kr
         </Text>
+        <NetOwnerModal />
       </View>
     </SafeAreaView>
   );
@@ -123,7 +291,6 @@ const styles = StyleSheet.create({
   bigText: {
     fontSize: 26,
     textAlign: "center",
-    maxWidth: 200,
   },
   smallText: {
     fontSize: 18,
@@ -144,5 +311,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
+  },
+  subHeading: {
+    fontSize: 24,
+    textAlign: "center",
+    margin: 10,
+    color: "white",
+  },
+  netOwnerText: {
+    fontSize: 18,
+    color: "white",
+    marginBottom: 20,
   },
 });

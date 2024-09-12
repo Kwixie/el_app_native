@@ -1,4 +1,13 @@
-const POWER_DATA = [
+interface DeviceData {
+  id: number;
+  device: string;
+  power: number;
+  icon: string;
+  duration: number;
+  description: string;
+}
+
+const POWER_DATA: DeviceData[] = [
   {
     id: 2,
     device: "elbilsbatteri",
