@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput as RNTextInput, View } from "react-native";
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dropdown } from "react-native-paper-dropdown";
 import { TextInput, Button, Menu, Divider } from "react-native-paper";
 import POWER_DATA from "@/assets/power-data";
-import { Device, ModifiedPowerData } from "../app/kalkylator/kalkylator";
+import { Device, ModifiedPowerData } from "../app/(tabs)/kalkylator";
 import { set } from "react-hook-form";
 import { TextInputLabelProp } from "react-native-paper/lib/typescript/components/TextInput/types";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -27,6 +27,8 @@ const CalculatorDevice = ({
   const [duration, setDuration] = useState<number>(0);
   const [showInputs, setShowInputs] = useState(false);
   const [savings, setSavings] = useState<number>(0);
+
+  const inputRef = useRef<RNTextInput>(null);
 
   useEffect(() => {
     setDeviceArray((prevState) => {
@@ -98,11 +100,12 @@ const CalculatorDevice = ({
                 mode="outlined"
                 disabled={false}
                 error={false}
-                style={styles.input}
+                style={[styles.input]}
                 right={<TextInput.Icon icon="chevron-down" color={"white"} />}
                 placeholderTextColor="white"
                 theme={{ colors: { onSurfaceVariant: "white" } }}
                 outlineColor="#d1603d"
+                ref={inputRef}
               />
             );
           }}
@@ -189,6 +192,10 @@ export default CalculatorDevice;
 const styles = StyleSheet.create({
   input: {
     backgroundColor: "#d1603d",
-    borderColor: "#d1603d",
+  },
+  active: {
+    borderWidth: 2,
+    borderColor: "black",
+    borderStyle: "solid",
   },
 });

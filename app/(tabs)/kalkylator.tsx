@@ -7,10 +7,11 @@ import {
   FlatList,
   ScrollView,
   KeyboardAvoidingView,
+  Dimensions,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React from "react";
-import { useState, useContext, useEffect } from "react";
-import { Controller, set, useForm } from "react-hook-form";
+import { useState, useContext, useEffect, useRef } from "react";
 import POWER_DATA from "@/assets/power-data";
 import { Dropdown } from "react-native-paper-dropdown";
 import { TextInput, Button } from "react-native-paper";
@@ -18,6 +19,7 @@ import { ElprisContext } from "@/context/elpris.provider";
 import CalculatorDevice from "@/components/CalculatorDevice";
 import Icon from "react-native-vector-icons/FontAwesome";
 import uuid from "react-native-uuid";
+import { set } from "react-hook-form";
 
 export type ModifiedPowerData = {
   label: string;
@@ -42,9 +44,13 @@ const Kalkylator = () => {
   const [deviceArray, setDeviceArray] = useState<Device[]>([
     { id: uuid.v4(), device: "", savings: 0 },
   ]);
+  const { height } = Dimensions.get("window");
+  // const [active, setIsActive] = useState(false);
+
+  const ref = useRef<ScrollView>(null);
 
   return (
-    <SafeAreaView style={{ height: "100%", padding: 10 }}>
+    <SafeAreaView style={{ height: height, padding: 10 }}>
       <Text
         style={{
           fontSize: 26,
@@ -61,6 +67,7 @@ const Kalkylator = () => {
           minHeight: "30%",
           backgroundColor: "hsl(14, 62%, 90%)",
         }}
+        ref={ref}
       >
         <View style={{ gap: 14, backgroundColor: "hsl(14, 62%, 90%)" }}>
           {deviceArray.map((device) => (
@@ -74,17 +81,18 @@ const Kalkylator = () => {
           ))}
         </View>
       </ScrollView>
-      <View style={{ marginTop: 16, alignItems: "center" }}>
+      <View style={{ marginTop: 16, alignItems: "center", marginBottom: 40 }}>
         <Button
           style={{ backgroundColor: "#d1603d", width: "100%" }}
           icon="plus"
           mode="contained"
-          onPress={() =>
+          onPress={() => {
             setDeviceArray([
-              { id: uuid.v4(), device: "", savings: 0 },
-              ...deviceArray,
-            ])
-          }
+              { id: uuid.v4(), device: "", savings: 0, active: true },
+              ...deviceArray.map((device) => ({ ...device, active: false })),
+            ]);
+            ref.current!.scrollTo({ animated: true, y: 0 });
+          }}
         >
           Lägg till apparat
         </Button>

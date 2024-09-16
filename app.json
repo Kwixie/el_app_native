@@ -17,9 +17,10 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kwixie.vadkostarvarmduschen"
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +36,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "445761e1-5120-4b4b-ac65-c4bb295bc50b"
+        "projectId": "c8ca4713-4bd7-434f-85e0-18fd289415cb"
       }
     }
   }

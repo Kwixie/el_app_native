@@ -4,11 +4,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ElprisContext } from "../context/elpris.provider";
+import { ElprisContext } from "../../context/elpris.provider";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import POWER_DATA from "../assets/power-data";
+import POWER_DATA from "../../assets/power-data";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import {
   Button,
@@ -177,6 +179,7 @@ export default function Index() {
   const { currentElpris, pricePerKwh, setElprisArea, elprisArea } =
     useContext(ElprisContext);
   const [animationShowerCost, setAnimationShowerCost] = useState("0.00");
+  const { height } = Dimensions.get("window");
 
   const hotShower = useMemo(() => {
     return (
@@ -187,22 +190,29 @@ export default function Index() {
 
   useEffect(() => {
     const countUpShowerCost = (currentShowerPrice: number) => {
-      console.log(currentShowerPrice);
       let i = 0;
       let countInterval = 1;
       const interval = setInterval(() => {
         i += countInterval;
-        console.log(countInterval);
+        console.log(`dushpriset`, currentShowerPrice);
+        console.log("i", i);
+        console.log("subtraktionen", countInterval);
         if (countInterval > 0.05) {
-          countInterval -= 0.1;
+          countInterval *= 0.95;
         }
-        setAnimationShowerCost(i.toFixed(2));
+        //else {
+        //   countInterval = 0; // Prevent floating-point precision issues
+        // }
+        if (i < currentShowerPrice) {
+          setAnimationShowerCost(i.toFixed(2));
+        }
         if (i >= currentShowerPrice) {
+          console.log("clearing interval");
           i = currentShowerPrice;
           setAnimationShowerCost(i.toFixed(2));
           clearInterval(interval);
         }
-      }, 50);
+      }, 100);
     };
     countUpShowerCost(Number(hotShower));
   }, [hotShower]);
@@ -212,7 +222,7 @@ export default function Index() {
   };
 
   return (
-    <SafeAreaView style={{ height: "100%" }}>
+    <SafeAreaView style={{ height: height }}>
       <View
         style={{
           flex: 1,
@@ -222,6 +232,7 @@ export default function Index() {
         }}
       >
         <HomeInfoModal />
+        {/* <KeyboardAvoidingView style={{ height: 200 }} behavior="height"> */}
         <View
           style={{
             height: 300,
@@ -240,6 +251,7 @@ export default function Index() {
             {animationShowerCost} kr
           </Text>
         </View>
+        {/* </KeyboardAvoidingView> */}
         <Text style={[styles.bigText, styles.whiteText, { marginBottom: 20 }]}>
           Elprisområde
         </Text>
